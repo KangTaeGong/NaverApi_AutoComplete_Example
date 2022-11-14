@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<body>
+<form th:action="@{/autoSearch}" method="get">
+    <div class="search-box">
+        <input type="text" placeholder="영화를 입력 후 Enter" id="autocompleteText" name="autocompleteText"
+        aria-label="Search">
+        <div class="search-btn" id="searchBtn">
+            <input type="submit" class="btn btn-primary block" value="검색">
+            <i class="fas fa-search"></i>
+        </div>
+    </div>
+</form>
+
+    <script>
+        $(document).ready(function() {
+            $( "#autocompleteText" ).autocomplete({
+                source : function( request, response ) {
+                    $.ajax({
+                        url: "autoSearch",
+                        dataType: "json",
+                        data: {
+                          searchValue: request.term // 사용자가 입력하는 값
+                        },
+                        success: function( result ) {
+                            response(
+                                $.map( result, function( item ) {
+                                    return {
+                                        label: item.data,
+                                        value: item.data
+                                    }
+                                })
+                            );
+                        }
+                    });
+                },
+                select: function( event, ui ) {},
+                minLength: 1
+            });
+        });
+    </script>
+</body>
+</html>
