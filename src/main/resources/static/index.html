@@ -6,44 +6,58 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <style>
+        #autocomplete-image {
+            width: 100px;
+            height: 120px;
+        }
+    </style>
 </head>
 <body>
-<form th:action="@{/autoSearch}" method="get">
     <div class="search-box">
-        <input type="text" placeholder="영화를 입력 후 Enter" id="autocompleteText" name="autocompleteText"
-        aria-label="Search">
-        <div class="search-btn" id="searchBtn">
-            <input type="submit" class="btn btn-primary block" value="검색">
+        <input type="text" placeholder="영화를 입력 후 Enter" id="autocompleteText" aria-label="Search">
             <i class="fas fa-search"></i>
-        </div>
     </div>
-</form>
 
     <script>
         $(document).ready(function() {
             $( "#autocompleteText" ).autocomplete({
                 source : function( request, response ) {
                     $.ajax({
+                        type : 'get',
                         url: "autoSearch",
                         dataType: "json",
                         data: {
                           searchValue: request.term // 사용자가 입력하는 값
                         },
-                        success: function( result ) {
+                        success: function( data ) {
                             response(
-                                $.map( result, function( item ) {
+                                $.map( data, function( item ) {
                                     return {
-                                        label: item.data,
-                                        value: item.data
+                                        label: item.title, // 목록에 표시되는 값
+                                        value: item.title, // 선택 시 input창에 표시되는 값
+                                        avatar: item.img
                                     }
                                 })
                             );
                         }
                     });
                 },
-                select: function( event, ui ) {},
-                minLength: 1
-            });
+                focus : function(event, ui) { // 포커스 시 이벤트
+                    return false; // 방향키로 바로 선택 방지(enter시 선택)
+                },
+                minLength: 1,
+                delay : 500, // 입력창에 글자가 써지고나서 autocomplete 이벤트 발생될 때 까지 지연 시간(ms)
+                close : function(event) { // 자동완성 창 닫아질 때의 이벤트
+                    console.log(event);
+                }
+            }).autocomplete('instance')._renderItem = function(ul, item) { // UI 변경 부
+                return $('<li>') //기본 tag가 li
+                .append('<div>' +
+                            '<img id="autocomplete-image" src="' + item.avatar + '"/>' + '<span>' + item.label + '</span>' + '</div>') // 원하는 모양의 HTML 만들면 됨
+                .appendTo(ul);
+            };
         });
     </script>
 </body>

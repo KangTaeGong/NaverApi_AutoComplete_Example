@@ -1,5 +1,6 @@
 package example.NaverApi_AutoComplete;
 
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class MovieService {
 
     final String baseUrl = "https://openapi.naver.com/v1/search/movie.json?query=";
@@ -25,9 +27,10 @@ public class MovieService {
     public String search(String clientId, String password, String _url) {
         HttpURLConnection con = null;
         String result = "";
+        int display = 5; // 한번에 표시할 검색 결과 개수
 
         try{
-            URL url = new URL(baseUrl + _url);
+            URL url = new URL(baseUrl + _url + "&display=" + display);
             con = (HttpURLConnection) url.openConnection();
 
             con.setRequestMethod("GET");
@@ -65,14 +68,14 @@ public class MovieService {
     // Naver Movie Api 사용해서 값 불러오기
     public Map<String, Object> getResultMapping(String searchValue, String[] fields) throws IOException {
 
+        log.info("getResultMapping() 실행");
         Map<String, Object> rtnObj = new HashMap<>();
 
-        JSONArray items = null;
         try {
             JSONParser parser = new JSONParser();
             JSONObject result = (JSONObject) parser.parse(searchValue);
 
-            items = (JSONArray) result.get("items");
+            JSONArray items = (JSONArray) result.get("items");
             List<Map<String, Object>> itemList = new ArrayList<>();
 
             for(int i = 0; i < items.size(); i++) {
@@ -82,8 +85,9 @@ public class MovieService {
                 for(String field : fields) {
                     itemMap.put(field, item.get(field));
                 }
-                rtnObj.put("result", itemList);
+                itemList.add(itemMap);
             }
+            rtnObj.put("result", itemList);
         } catch (ParseException e) {
             e.printStackTrace();
         }

@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,34 +23,43 @@ public class SearchController {
 
     @Autowired MovieService movieService;
 
-//    @RequestMapping(value = "/autoSearch", method = RequestMethod.GET,
-//            produces = "application/json; charset=UTF-8")
-    @GetMapping("/autoSearch")
+    @GetMapping(value = "/autoSearch", produces = "application/json; charset=UTF-8")
     @ResponseBody
     public void autoSearch(Model model, HttpServletRequest request,
-                           HttpServletResponse response, String autocompleteText) throws IOException {
+                           HttpServletResponse response) throws IOException {
 
-        String id = "";
-        String secret = "";
+        String id = "XdxyCwL_eJGrH8UBpluF";
+        String secret = "1f8yHJOOWY";
         String[] fields = {"title", "image", "pubDate", "director", "actor", "userRating"};
         String searchValue = request.getParameter("searchValue"); // 사용자가 입력한 검색어
         log.info("searchValue = {}", searchValue);
-        log.info("autocompleteText = {}", autocompleteText);
+
         try {
+            log.info("URL Encoding 실행");
             String url = URLEncoder.encode(searchValue, "UTF-8");
             String result = movieService.search(id, secret, url);
+//            log.info("MovieService.search() = {}", result);
 
             Map<String, Object> resultMapping = movieService.getResultMapping(result, fields);
-//            JSONArray resultMapping = movieService.getResultMapping(result, fields);
 
             List<Map<String, Object>> items = (List<Map<String, Object>>) resultMapping.get("result");
-
             JSONArray jsonArray = new JSONArray();
-            for(Map<String, Object> item : items) {
-                JSONObject jsonObject = (JSONObject) item.get("title");
 
-                jsonArray.add(jsonObject);
+            for(Map<String, Object> item : items) {
+                JSONObject jsonObject = new JSONObject();
+                String str = (String) item.get("title");
+                str = str.replaceAll("<b>", "");
+                str = str.replaceAll("</b>", "");
+                log.info("str = {}", str);
+
+                jsonObject.put("title", str); // title 값만 받아온 뒤 jsonObject로 cast
+                jsonObject.put("img", item.get("image"));
+                log.info("jsonObject = {}", jsonObject);
+
                 log.info("======================================");
+
+                jsonArray.add(jsonObject); // jsonObject값을 array에 추가
+                log.info("jsonArray = {}", jsonArray);
 
                 for(String field : fields)
                     log.info(field + "->" + item.get(field));
