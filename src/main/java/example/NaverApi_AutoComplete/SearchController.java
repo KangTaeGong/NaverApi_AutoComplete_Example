@@ -28,8 +28,8 @@ public class SearchController {
     public void autoSearch(Model model, HttpServletRequest request,
                            HttpServletResponse response) throws IOException {
 
-        String id = "XdxyCwL_eJGrH8UBpluF";
-        String secret = "1f8yHJOOWY";
+        String id = "";
+        String secret = "";
         String[] fields = {"title", "image", "pubDate", "director", "actor", "userRating"};
         String searchValue = request.getParameter("searchValue"); // 사용자가 입력한 검색어
         log.info("searchValue = {}", searchValue);
